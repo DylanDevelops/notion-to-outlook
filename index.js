@@ -1,3 +1,7 @@
+// ~ Notion to Outlook ~
+// Author: Dylan Ravel
+// LICENSE: MIT
+
 const { Client } = require('@notionhq/client');
 require('dotenv').config();
 
@@ -8,7 +12,7 @@ const notion = new Client({
 async function fetchData() {
     try {
         const response = await notion.databases.query({
-            database_id: process.env.NOTION_DATABASE_ID,
+            database_id: process.env.NOTION_UNI_DEADLINES_DATABASE_ID,
         });
 
         const data = response.results;
