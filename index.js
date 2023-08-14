@@ -9,12 +9,6 @@ const notion = new Client({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
 });
 
-let assignmentName;
-let assignmentDeadline;
-let assignmentType;
-let assignmentProgress;
-let assignmentCourseName;
-
 async function fetchData() {
     try {
         const response = await notion.databases.query({
@@ -25,6 +19,12 @@ async function fetchData() {
 
         console.log("Retrieved data:");
         data.forEach(async item => {
+            let assignmentName;
+            let assignmentDeadline;
+            let assignmentType;
+            let assignmentProgress;
+            let assignmentCourseNames = []; // Use an array to store multiple course names
+
             // Access and log the "name" property
             if (item.properties.name && item.properties.name.title && item.properties.name.title[0]) {
                 assignmentName = item.properties.name.title[0].plain_text;
@@ -53,31 +53,48 @@ async function fetchData() {
                 console.error("Item has no 'progress' property.");
             }
 
-            // Inside the loop, after retrieving the related course page
-            if (item.properties.course && item.properties.course.relation && item.properties.course.relation[0]) {
-                const relatedCourseId = item.properties.course.relation[0].id;
+            // Inside the loop, after retrieving the related course pages
+            if (item.properties.course && item.properties.course.relation && item.properties.course.relation.length > 0) {
+                const relatedCourseIds = item.properties.course.relation.map(relation => relation.id);
 
-                // Retrieve the related course page
-                const relatedCourse = await notion.pages.retrieve({
-                    page_id: relatedCourseId,
+                // Retrieve the related course pages
+                const relatedCourses = await Promise.all(relatedCourseIds.map(async courseId => {
+                    return await notion.pages.retrieve({
+                        page_id: courseId,
+                    });
+                }));
+
+                // Access and log the 'course name' property of each related course
+                assignmentCourseNames = relatedCourses.map(relatedCourse => {
+                    if (relatedCourse.properties['course name'] && relatedCourse.properties['course name'].rich_text && relatedCourse.properties['course name'].rich_text[0]) {
+                        return relatedCourse.properties['course name'].rich_text[0].plain_text;
+                    } else {
+                        console.error("Related course has no 'course name' property.");
+                        return null;
+                    }
                 });
-
-                // Access and log the 'course name' property of the related course
-                if (relatedCourse.properties['course name'] && relatedCourse.properties['course name'].rich_text && relatedCourse.properties['course name'].rich_text[0]) {
-                    assignmentCourseName = relatedCourse.properties['course name'].rich_text[0].plain_text;
-                } else {
-                    console.error("Related course has no 'course name' property.");
-                }
 
                 // ... (rest of the code)
             } else {
                 console.error("Item has no 'course' property.");
             }
 
+            // Format course names based on the number of courses
+            let formattedCourseNames = '';
+            const numCourses = assignmentCourseNames.length;
+
+            if (numCourses === 1) {
+                formattedCourseNames = assignmentCourseNames[0];
+            } else if (numCourses === 2) {
+                formattedCourseNames = assignmentCourseNames.join(' & ');
+            } else if (numCourses > 2) {
+                formattedCourseNames = assignmentCourseNames.slice(0, -1).join(', ') + ', & ' + assignmentCourseNames.slice(-1)[0];
+            }
+
             console.log(
                 "\n",
                 "Assignment Name: " + assignmentName + "\n",
-                "Course Name: " + assignmentCourseName + "\n",
+                "Course Names: " + formattedCourseNames + "\n",
                 "Assignment Deadline: " + assignmentDeadline + "\n",
                 "Assignment Type: " + assignmentType + "\n",
                 "Assignment Progress: " + assignmentProgress
