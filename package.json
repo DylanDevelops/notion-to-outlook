@@ -1,0 +1,17 @@
+{
+  "name": "notion-to-outlook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Dylan Ravel",
+  "license": "MIT",
+  "dependencies": {
+    "@notionhq/client": "^2.2.10",
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1"
+  }
+}
