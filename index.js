@@ -13,7 +13,7 @@ const notion = new Client({
 const pca = new PublicClientApplication({
     auth: {
         clientId: process.env.APPLICATION_CLIENT_ID,
-        authority: "https://login.microsoftonline.com/organizations",
+        authority: "https://outlook.office365.com",
     },
 });
 
