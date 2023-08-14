@@ -4,7 +4,6 @@
 
 const { Client } = require('@notionhq/client');
 const { PublicClientApplication } = require('@azure/msal-node');
-const { LogLevel } = require('@azure/msal-node');
 require('dotenv').config();
 
 const notion = new Client({
@@ -14,16 +13,7 @@ const notion = new Client({
 const pca = new PublicClientApplication({
     auth: {
         clientId: process.env.APPLICATION_CLIENT_ID,
-        authority: `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}`,
-    },
-    system: {
-        loggerOptions: {
-            loggerCallback(loglevel, message, containsPii) {
-                console.log(message);
-            },
-            piiLoggingEnabled: false,
-            logLevel: LogLevel.Verbose, // Set log level to capture more details
-        },
+        authority: "https://outlook.office365.com",
     },
 });
 
@@ -125,65 +115,4 @@ async function fetchData() {
     }
 }
 
-async function createCalendarEvent(eventName, eventDate, accessToken) {
-    try {
-        const startDateTime = new Date(eventDate).toISOString();
-        const endDateTime = new Date(eventDate).toISOString();
-
-        const event = {
-            subject: eventName,
-            start: {
-                dateTime: startDateTime,
-                timeZone: 'UTC',
-            },
-            end: {
-                dateTime: endDateTime,
-                timeZone: `UTC`,
-            },
-        };
-
-        const graphClient = require('@microsoft/microsoft-graph-client');
-        const client = graphClient.Client.init({
-            authProvider: done => {
-                done(null, accessToken);
-            },
-        });
-
-        console.log('Before creating event');
-        const response = await client.api('/me/events').post(event);
-        console.log('Calendar event created:', response);
-        console.log('After creating event');
-    } catch (error) {
-        console.error('Error creating calendar event:', error);
-    }
-}
-
-(async () => {
-    try {
-        const fetchDataResponse = await fetchData();
-        if(fetchDataResponse) {
-            const eventName = "TESTING";
-            const eventDate = "2023-08-15";
-
-            try {
-                const tokenResponse = await pca.acquireTokenByClientCredential({
-                    scopes: ["https://outlook.office365.com/Calendars.ReadWrite"],
-                });
-
-                if(tokenResponse && tokenResponse.accessToken) {
-                    const accessToken = tokenResponse.accessToken;
-                    console.log("token:", accessToken);
-                    
-                    await createCalendarEvent(eventName, eventDate, accessToken);
-                    console.log("made it to here");
-                } else {
-                    console.error('Failed to acquire token.');
-                }
-            } catch (error) {
-                console.error('Error acquiring token:', error);
-            }
-        }
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    }
-})();
+fetchData();
