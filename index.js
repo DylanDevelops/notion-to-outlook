@@ -1,11 +1,14 @@
-// ~ Notion to Outlook ~
-// Author: Dylan Ravel
-// LICENSE: MIT
+// * ~ Notion to Outlook ~
+// * Author: Dylan Ravel
+// * LICENSE: MIT
 
-const { Client } = require('@notionhq/client');
+const https = require('https');
+const { Client: MSGraphClient } = require('@microsoft/microsoft-graph-client');
+const { Client: NotionClient } = require('@notionhq/client');
 require('dotenv').config();
 
-const notion = new Client({
+/*
+const notion = new NotionClient({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
 });
 
@@ -108,3 +111,79 @@ async function fetchData() {
 }
 
 fetchData();
+*/
+
+// obtain an access token
+async function getAccessToken() {
+    const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
+
+    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_ID}&grant_type=client_credentials`;
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    };
+
+    return new Promise((resolve, reject) => {
+        const req = https.request(tokenEndpoint, options, (res) => {
+            let responseData = '';
+
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+
+            res.on('end', () => {
+                const result = JSON.parse(responseData);
+                resolve(result.access_token);
+            });
+        });
+
+        req.on('error', (error) => {
+            reject(error);
+        });
+
+        req.write(data);
+        req.end();
+    });
+}
+
+// Create an event
+async function createEvent(accessToken) {
+    const client = MSGraphClient.init({
+        authProvider: (done) => {
+            done(null, accessToken);
+        },
+    });
+
+    const event = {
+        subject: 'Sample Event',
+        start: {
+        dateTime: '2023-08-15T10:00:00',
+        timeZone: 'UTC',
+        },
+        end: {
+        dateTime: '2023-08-15T12:00:00',
+        timeZone: 'UTC',
+        },
+    };
+
+    try {
+        const res = await client.api(`/users/${process.env.APPLICATION_TARGET_EMAIL}/events`).post(event);
+        console.log('Event created:', res);
+    } catch (error) {
+        console.error('Error creating event:', error.message);
+    }
+}
+  
+  async function main() {
+    try {
+        const accessToken = await getAccessToken();
+        await createEvent(accessToken);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
+main();

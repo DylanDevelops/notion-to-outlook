@@ -10,7 +10,9 @@
   "author": "Dylan Ravel",
   "license": "MIT",
   "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.5",
     "@notionhq/client": "^2.2.10",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
   }
 }
