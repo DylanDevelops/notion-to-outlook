@@ -3,10 +3,18 @@
 // LICENSE: MIT
 
 const { Client } = require('@notionhq/client');
+const { PublicClientApplication } = require('@azure/msal-node');
 require('dotenv').config();
 
 const notion = new Client({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
+});
+
+const pca = new PublicClientApplication({
+    auth: {
+        clientId: process.env.APPLICATION_CLIENT_ID,
+        authority: "https://login.microsoftonline.com/organizations",
+    },
 });
 
 async function fetchData() {
