@@ -8,7 +8,6 @@ const { Client: MSGraphClient } = require('@microsoft/microsoft-graph-client');
 const { Client: NotionClient } = require('@notionhq/client');
 require('dotenv').config();
 
-/*
 const notion = new NotionClient({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
 });
@@ -111,9 +110,6 @@ async function fetchData() {
     }
 }
 
-fetchData();
-*/
-
 // obtain an access token
 async function getAccessToken() {
     const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
@@ -159,7 +155,7 @@ async function getAccessToken() {
 
 // Create an event
 async function createEvent(accessToken) {
-    console.log('Access token:', accessToken); // Debug: Check if accessToken is received
+    console.log('Retrieved Access token:', accessToken); // Debug: Check if accessToken is received
     
     const client = MSGraphClient.init({
         authProvider: (done) => {
@@ -191,7 +187,7 @@ async function createEvent(accessToken) {
 async function main() {
     try {
         const accessToken = await getAccessToken();
-        console.log('Main access token:', accessToken); // Debug: Check if accessToken is received in the main function
+        await fetchData();
         await createEvent(accessToken);
     } catch (error) {
         console.error('Error:', error.message);
