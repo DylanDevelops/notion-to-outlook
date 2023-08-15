@@ -1,6 +1,6 @@
 # Notion to Outlook
 
-[![CodeFactor](https://www.codefactor.io/repository/github/dylandevelops/dylanravel.com/badge)](https://www.codefactor.io/repository/github/dylandevelops/dylanravel.com)
+[![CodeFactor](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook/badge)](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook)
 
 # What is this?
 This is the official codebase for my Notion to Outlook Calendar Event generator.
