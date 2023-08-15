@@ -1,0 +1,30 @@
+name: Update Outlook Calendar
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run script
+      run: node path/to/your/script.js
+      env:
+        NOTION_INTEGRATION_TOKEN: ${{ secrets.NOTION_INTEGRATION_TOKEN }}
+        NOTION_UNI_DEADLINES_DATABASE_ID: ${{ secrets.NOTION_UNI_DEADLINES_DATABASE_ID }}
+        APPLICATION_TENANT_ID: ${{ secrets.APPLICATION_TENANT_ID }}
+        APPLICATION_CLIENT_ID: ${{ secrets.APPLICATION_CLIENT_ID }}
+        APPLICATION_SECRET_CLIENT_VALUE: ${{ secrets.APPLICATION_SECRET_CLIENT_VALUE }}
+        APPLICATION_TARGET_EMAIL: ${{ secrets.APPLICATION_TARGET_EMAIL }}
