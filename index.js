@@ -2,8 +2,6 @@
 // * Author: Dylan Ravel
 // * LICENSE: MIT
 
-const https = require('https');
-const util = require('util');
 const { Client: MSGraphClient } = require('@microsoft/microsoft-graph-client');
 const { Client: NotionClient } = require('@notionhq/client');
 require('dotenv').config();
@@ -36,31 +34,16 @@ async function getAccessToken() {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
+        body: data,
     };
 
-    const req = https.request(tokenEndpoint, options);
-    const write = util.promisify(req.write).bind(req);
-    const end = util.promisify(req.end).bind(req);
-
     try {
-        await write(data);
-        await end();
-        const responseData = await new Promise((resolve, reject) => {
-            req.on('response', (res) => {
-                let data = '';
-                res.on('data', (chunk) => {
-                    data += chunk;
-                });
-                res.on('end', () => {
-                    resolve(data);
-                });
-            });
-            req.on('error', (error) => {
-                reject(error);
-            });
-        });
+        // dynamic imports
+        const fetch = require('cross-fetch');
 
-        const result = JSON.parse(responseData);
+        const response = await fetch(tokenEndpoint, options);
+        const result = await response.json();
+
         return result.access_token;
     } catch (error) {
         console.error('Error obtaining access token:', error);
@@ -87,6 +70,9 @@ async function createEvent(accessToken, eventDetails) {
 
 async function main() {
     try {
+        // dynamic fetch
+        const fetch = require('cross-fetch');
+
         const accessToken = await getAccessToken();
         const data = await fetchData();
 

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node -r esm index.js"
   },
   "keywords": [],
   "author": "Dylan Ravel",
@@ -12,7 +13,8 @@
   "dependencies": {
     "@microsoft/microsoft-graph-client": "^3.0.5",
     "@notionhq/client": "^2.2.10",
+    "cross-fetch": "^4.0.0",
     "dotenv": "^16.3.1",
-    "node-fetch": "^3.3.2"
+    "esm": "^3.2.25"
   }
 }
