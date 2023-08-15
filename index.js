@@ -18,10 +18,81 @@ async function fetchData() {
             database_id: process.env.NOTION_UNI_DEADLINES_DATABASE_ID,
         });
 
-        const data = response.results;
+        return response.results;
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        throw error;
+    }
+}
 
-        console.log("Retrieved data:");
-        data.forEach(async item => {
+// obtain an access token
+async function getAccessToken() {
+    const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
+
+    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_VALUE}&grant_type=client_credentials`;
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    };
+
+    const req = https.request(tokenEndpoint, options);
+    const write = util.promisify(req.write).bind(req);
+    const end = util.promisify(req.end).bind(req);
+
+    try {
+        await write(data);
+        await end();
+        const responseData = await new Promise((resolve, reject) => {
+            req.on('response', (res) => {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                res.on('end', () => {
+                    resolve(data);
+                });
+            });
+            req.on('error', (error) => {
+                reject(error);
+            });
+        });
+
+        const result = JSON.parse(responseData);
+        return result.access_token;
+    } catch (error) {
+        console.error('Error obtaining access token:', error);
+        throw error;
+    }
+}
+
+// Create an event
+async function createEvent(accessToken, eventDetails) {
+    const client = MSGraphClient.init({
+        authProvider: (done) => {
+            done(null, accessToken);
+        },
+    });
+
+    try {
+        console.log('Creating event...');
+        const res = await client.api(`/users/${process.env.APPLICATION_TARGET_EMAIL}/events`).post(eventDetails);
+        console.log('Event created', res);
+    } catch (error) {
+        console.error('Error creating event:', error.message);
+    }
+}
+
+async function main() {
+    try {
+        const accessToken = await getAccessToken();
+        const data = await fetchData();
+
+        console.log("Retrieved Data:");
+
+        for(const item of data) {
             let assignmentName;
             let assignmentDeadline;
             let assignmentType;
@@ -76,8 +147,6 @@ async function fetchData() {
                         return null;
                     }
                 });
-
-                // ... (rest of the code)
             } else {
                 console.error("Item has no 'course' property.");
             }
@@ -100,95 +169,25 @@ async function fetchData() {
                 "Course Names: " + formattedCourseNames + "\n",
                 "Assignment Deadline: " + assignmentDeadline + "\n",
                 "Assignment Type: " + assignmentType + "\n",
-                "Assignment Progress: " + assignmentProgress
+                "Assignment Progress: " + assignmentProgress,
+                "\n"
             );
 
-            console.log(""); // Print an empty line for separation
-        });
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    }
-}
+            const eventDetails = {
+                subject: `(${formattedCourseNames}) ${assignmentName}`,
+                start: {
+                    dateTime: assignmentDeadline,
+                    timeZone: 'UTC',
+                },
+                end: {
+                    dateTime: assignmentDeadline,
+                    timeZone: 'UTC',
+                },
+            };
 
-// obtain an access token
-async function getAccessToken() {
-    const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
-
-    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_VALUE}&grant_type=client_credentials`;
-
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-    };
-
-    const req = https.request(tokenEndpoint, options);
-    const write = util.promisify(req.write).bind(req);
-    const end = util.promisify(req.end).bind(req);
-
-    try {
-        await write(data);
-        await end();
-        const responseData = await new Promise((resolve, reject) => {
-            req.on('response', (res) => {
-                let data = '';
-                res.on('data', (chunk) => {
-                    data += chunk;
-                });
-                res.on('end', () => {
-                    resolve(data);
-                });
-            });
-            req.on('error', (error) => {
-                reject(error);
-            });
-        });
-
-        const result = JSON.parse(responseData);
-        return result.access_token;
-    } catch (error) {
-        console.error('Error obtaining access token:', error);
-        throw error;
-    }
-}
-
-// Create an event
-async function createEvent(accessToken) {
-    console.log('Retrieved Access token:', accessToken); // Debug: Check if accessToken is received
-    
-    const client = MSGraphClient.init({
-        authProvider: (done) => {
-            done(null, accessToken);
-        },
-    });
-
-    const event = {
-        subject: 'Sample Event',
-        start: {
-            dateTime: '2023-08-15T10:00:00',
-            timeZone: 'UTC',
-        },
-        end: {
-            dateTime: '2023-08-15T12:00:00',
-            timeZone: 'UTC',
-        },
-    };
-
-    try {
-        console.log('Creating event...');
-        const res = await client.api(`/users/${process.env.APPLICATION_TARGET_EMAIL}/events`).post(event);
-        console.log('Event created:', res);
-    } catch (error) {
-        console.error('Error creating event:', error.message);
-    }
-}
-
-async function main() {
-    try {
-        const accessToken = await getAccessToken();
-        await fetchData();
-        await createEvent(accessToken);
+            // creates an event
+            await createEvent(accessToken, eventDetails);
+        }
     } catch (error) {
         console.error('Error:', error.message);
     }
