@@ -3,6 +3,7 @@
 // * LICENSE: MIT
 
 const https = require('https');
+const util = require('util');
 const { Client: MSGraphClient } = require('@microsoft/microsoft-graph-client');
 const { Client: NotionClient } = require('@notionhq/client');
 require('dotenv').config();
@@ -117,7 +118,7 @@ fetchData();
 async function getAccessToken() {
     const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
 
-    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_ID}&grant_type=client_credentials`;
+    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_VALUE}&grant_type=client_credentials`;
 
     const options = {
         method: 'POST',
@@ -126,31 +127,40 @@ async function getAccessToken() {
         },
     };
 
-    return new Promise((resolve, reject) => {
-        const req = https.request(tokenEndpoint, options, (res) => {
-            let responseData = '';
+    const req = https.request(tokenEndpoint, options);
+    const write = util.promisify(req.write).bind(req);
+    const end = util.promisify(req.end).bind(req);
 
-            res.on('data', (chunk) => {
-                responseData += chunk;
+    try {
+        await write(data);
+        await end();
+        const responseData = await new Promise((resolve, reject) => {
+            req.on('response', (res) => {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                res.on('end', () => {
+                    resolve(data);
+                });
             });
-
-            res.on('end', () => {
-                const result = JSON.parse(responseData);
-                resolve(result.access_token);
+            req.on('error', (error) => {
+                reject(error);
             });
         });
 
-        req.on('error', (error) => {
-            reject(error);
-        });
-
-        req.write(data);
-        req.end();
-    });
+        const result = JSON.parse(responseData);
+        return result.access_token;
+    } catch (error) {
+        console.error('Error obtaining access token:', error);
+        throw error;
+    }
 }
 
 // Create an event
 async function createEvent(accessToken) {
+    console.log('Access token:', accessToken); // Debug: Check if accessToken is received
+    
     const client = MSGraphClient.init({
         authProvider: (done) => {
             done(null, accessToken);
@@ -160,26 +170,28 @@ async function createEvent(accessToken) {
     const event = {
         subject: 'Sample Event',
         start: {
-        dateTime: '2023-08-15T10:00:00',
-        timeZone: 'UTC',
+            dateTime: '2023-08-15T10:00:00',
+            timeZone: 'UTC',
         },
         end: {
-        dateTime: '2023-08-15T12:00:00',
-        timeZone: 'UTC',
+            dateTime: '2023-08-15T12:00:00',
+            timeZone: 'UTC',
         },
     };
 
     try {
+        console.log('Creating event...');
         const res = await client.api(`/users/${process.env.APPLICATION_TARGET_EMAIL}/events`).post(event);
         console.log('Event created:', res);
     } catch (error) {
         console.error('Error creating event:', error.message);
     }
 }
-  
-  async function main() {
+
+async function main() {
     try {
         const accessToken = await getAccessToken();
+        console.log('Main access token:', accessToken); // Debug: Check if accessToken is received in the main function
         await createEvent(accessToken);
     } catch (error) {
         console.error('Error:', error.message);
