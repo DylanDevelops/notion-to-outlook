@@ -1,4 +1,4 @@
-# Notion to Outlook
+# Notion to Outlook test
 
 [![CodeFactor](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook/badge)](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook) [![Update Outlook Calendar](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/update-outlook-calendar.yml/badge.svg?branch=main)](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/update-outlook-calendar.yml) [![CodeQL](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/github-code-scanning/codeql)
 
