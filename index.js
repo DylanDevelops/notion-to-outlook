@@ -31,7 +31,7 @@ async function fetchData() {
 async function getAccessToken() {
     const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
 
-    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https%3A%2F%2Fgraph.microsoft.com%2FCalendars.ReadWrite%20https%3A%2F%2Fgraph.microsoft.com%2FCalendars.ReadWrite.Shared&client_secret=${process.env.APPLICATION_SECRET_CLIENT_VALUE}&grant_type=client_credentials`;
+    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https://graph.microsoft.com/.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_VALUE}&grant_type=client_credentials`;
 
     const options = {
         method: 'POST',
