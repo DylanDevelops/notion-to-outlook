@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run script
+    - name: Update Outlook Calendar with Notion Deadlines
       run: npm start
       env:
         NOTION_INTEGRATION_TOKEN: ${{ secrets.NOTION_INTEGRATION_TOKEN }}
