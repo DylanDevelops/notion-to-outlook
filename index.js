@@ -27,7 +27,7 @@ async function fetchData() {
     }
 }
 
-// obtain an access token
+// Obtain an access token using the client credentials flow
 async function getAccessToken() {
     const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
 
@@ -42,11 +42,13 @@ async function getAccessToken() {
     };
 
     try {
-        // dynamic imports
         const fetch = require('cross-fetch');
 
         const response = await fetch(tokenEndpoint, options);
+        console.log("Fetch Response:", response);
         const result = await response.json();
+
+        console.log("Token Response:", result);
 
         return result.access_token;
     } catch (error) {
@@ -55,7 +57,7 @@ async function getAccessToken() {
     }
 }
 
-// Create an event
+// Create an event using the provided access token
 async function createEvent(accessToken, eventDetails) {
     const client = MSGraphClient.init({
         authProvider: (done) => {
@@ -65,7 +67,7 @@ async function createEvent(accessToken, eventDetails) {
 
     try {
         console.log('Creating event...');
-        const res = await client.api(`/users/${process.env.APPLICATION_TARGET_EMAIL}/events`).post(eventDetails);
+        const res = await client.api(`/me/calendars/${process.env.APPLICATION_TARGET_CALENDAR_ID}/events`).post(eventDetails);
         console.log('Event created', res);
     } catch (error) {
         console.error('Error creating event:', error.message);
