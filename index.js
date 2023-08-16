@@ -45,10 +45,7 @@ async function getAccessToken() {
         const fetch = require('cross-fetch');
 
         const response = await fetch(tokenEndpoint, options);
-        console.log("Fetch Response:", response);
         const result = await response.json();
-
-        console.log("Token Response:", result);
 
         return result.access_token;
     } catch (error) {
