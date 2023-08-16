@@ -14,7 +14,11 @@ const notion = new NotionClient({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
 });
 
-async function fetchData() {
+// store these securely
+let storedAccessToken = null;
+let storedRefreshToken = null;
+
+async function fetchNotionData() {
     try {
         const response = await notion.databases.query({
             database_id: process.env.NOTION_UNI_DEADLINES_DATABASE_ID,
@@ -27,8 +31,49 @@ async function fetchData() {
     }
 }
 
+async function refreshAccessToken(refreshToken) {
+    const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
+    const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https://graph.microsoft.com/.default&refresh_token=${refreshToken}&grant_type=refresh_token`;
+    
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: data,
+    };
+
+    try {
+        const fetch = require('cross-fetch');
+        const response = await fetch(tokenEndpoint, options);
+        const result = await response.json();
+
+        // update stored tokens
+        storedAccessToken = result.access_token;
+        storedRefreshToken = result.refresh_token;
+
+        return storedAccessToken;
+    } catch (error) {
+        console.error('Error refreshing access token:', error);
+        throw error;
+    }
+}
+
 // Obtain an access token using the client credentials flow
 async function getAccessToken() {
+    if(storedAccessToken) {
+        return storedAccessToken; // use the stored access token if available
+    }
+
+    if(storedRefreshToken) {
+        const newAccessToken = await refreshAccessToken(storedRefreshToken);
+
+        if(newAccessToken) {
+            storedAccessToken = newAccessToken;
+            return newAccessToken;
+        }
+    }
+
     const tokenEndpoint = `https://login.microsoftonline.com/${process.env.APPLICATION_TENANT_ID}/oauth2/v2.0/token`;
 
     const data = `client_id=${process.env.APPLICATION_CLIENT_ID}&scope=https://graph.microsoft.com/.default&client_secret=${process.env.APPLICATION_SECRET_CLIENT_VALUE}&grant_type=client_credentials`;
@@ -64,7 +109,7 @@ async function createEvent(accessToken, eventDetails) {
 
     try {
         console.log('Creating event...');
-        const res = await client.api(`/me/calendars/${process.env.APPLICATION_TARGET_CALENDAR_ID}/events`).post(eventDetails);
+        const res = await client.api(`/users/${process.env.APPLICATION_TARGET_USER_ID}/calendars/${process.env.APPLICATION_TARGET_CALENDAR_ID}/events`).post(eventDetails);
         console.log('Event created', res);
     } catch (error) {
         console.error('Error creating event:', error.message);
@@ -77,7 +122,7 @@ async function main() {
         const fetch = require('cross-fetch');
 
         const accessToken = await getAccessToken();
-        const data = await fetchData();
+        const data = await fetchNotionData();
 
         console.log("Retrieved Data:");
 
