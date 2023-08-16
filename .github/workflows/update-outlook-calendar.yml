@@ -20,7 +20,7 @@ jobs:
       run: npm install
 
     - name: Run script
-      run: node index.js
+      run: npm start
       env:
         NOTION_INTEGRATION_TOKEN: ${{ secrets.NOTION_INTEGRATION_TOKEN }}
         NOTION_UNI_DEADLINES_DATABASE_ID: ${{ secrets.NOTION_UNI_DEADLINES_DATABASE_ID }}
