@@ -1,9 +1,13 @@
-# Notion to Outlook
-
-[![CodeFactor](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook/badge)](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook) [![Update Outlook Calendar](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/update-outlook-calendar.yml/badge.svg?branch=main)](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/update-outlook-calendar.yml) [![CodeQL](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/github-code-scanning/codeql)
-
 <p align="center">
   <img src="https://github.com/DylanDevelops/notion-to-outlook/assets/48571264/77232c66-a3cf-48eb-9d26-b0bb35dafc51" style="display: block; margin-left: auto; margin-right: auto; width: 75%; height: 75%; border-radius: 25px;">
+</p>
+<p align="center">
+<img alt="CodeFactor Grade" src="https://img.shields.io/codefactor/grade/github/DylanDevelops/notion-to-outlook/main?style=for-the-badge&logo=codefactor">
+<img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/DylanDevelops/notion-to-outlook/update-outlook-calendar.yml?style=for-the-badge&logo=github&label=Update%20Outlook%20Calendar">
+<img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/DylanDevelops/notion-to-outlook/github-code-scanning%2Fcodeql?style=for-the-badge&logo=GitHub&label=CodeQL">
+<br>
+<img alt="GitHub contributors" src="https://img.shields.io/github/contributors/DylanDevelops/notion-to-outlook?style=for-the-badge">
+<img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/t/DylanDevelops/notion-to-outlook/main?style=for-the-badge">
 </p>
 
 # What is this?
