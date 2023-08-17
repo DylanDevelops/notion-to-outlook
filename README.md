@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="https://github.com/DylanDevelops/notion-to-outlook/assets/48571264/77232c66-a3cf-48eb-9d26-b0bb35dafc51" style="display: block; margin-left: auto; margin-right: auto; width: 75%; height: 75%; border-radius: 25px;">
+  <img src="https://github.com/DylanDevelops/notion-to-outlook/assets/48571264/22d4a7a0-48ef-48ca-ae71-709ce9ae3824" style="display: block; margin-left: auto; margin-right: auto; width: 75%; height: 75%; border-radius: 25px;">
+  
 </p>
 <p align="center">
 <img alt="CodeFactor Grade" src="https://img.shields.io/codefactor/grade/github/DylanDevelops/notion-to-outlook/main?style=for-the-badge&logo=codefactor">
