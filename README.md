@@ -12,11 +12,24 @@
 </p>
 
 # What is this?
-This is the official codebase for my Notion to Outlook Calendar Event generator.
-
+This is the official codebase for my Notion to Outlook Calendar Event generator. It pulls data from a notion calendar and creates an Outlook event for each assignment. The program then runs every hour to update the Outlook calendar accordingly.
 
 # Issues or Bugs
-Please create an [issue](https://github.com/DylanDevelops/notion-to-outlook/issues/new) with as much information as you can. I will try my best to fix it.
+Please create an [issue](https://github.com/DylanDevelops/notion-to-outlook/issues/new) with as much information as possible. Creating a detailed issue report helps contributors fix the issue.
 
 # Contributions
-This project is open source so that others can update it if they would like to. If there is a feature you implement, please create a pull request **targeting the `main` branch**. Submit the pull request when you are done making changes, and I will either approve, deny, or request changes.
+This project is open source so that others can update it if they would like to. If there is a feature you implement, please follow the steps below:
+
+**Development:**
+1. Clone the project to your local machine.
+2. Create a new branch **targeting the `main` branch**.
+3. Run the command `npm install` in the console and let the dependencies install.
+4. Make your changes to the code.
+5. Run your program using the command `npm start`.
+
+**Publishing:**
+1. If everything works, create a new pull request
+2. Let the status checks run. (You need CodeFactor and CodeQL status checks to pass)
+3. Once status checks have run, wait for approval from a project maintainer. (They may want to change things, so keep an eye on your pull request until it is merged)
+4. Delete your branch Once the pull request is approved and merged.
+5. Thank you for your contribution!
