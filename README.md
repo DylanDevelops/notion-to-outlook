@@ -2,8 +2,13 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook/badge)](https://www.codefactor.io/repository/github/dylandevelops/notion-to-outlook) [![Update Outlook Calendar](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/update-outlook-calendar.yml/badge.svg?branch=main)](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/update-outlook-calendar.yml) [![CodeQL](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/DylanDevelops/notion-to-outlook/actions/workflows/github-code-scanning/codeql)
 
+<p align="center">
+  <img src="https://github.com/DylanDevelops/notion-to-outlook/assets/48571264/77232c66-a3cf-48eb-9d26-b0bb35dafc51" style="display: block; margin-left: auto; margin-right: auto; width: 75%; height: 75%; border-radius: 25px;">
+</p>
+
 # What is this?
 This is the official codebase for my Notion to Outlook Calendar Event generator.
+
 
 # Issues or Bugs
 Please create an [issue](https://github.com/DylanDevelops/notion-to-outlook/issues/new) with as much information as you can. I will try my best to fix it.
