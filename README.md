@@ -18,14 +18,15 @@ This is the official codebase for my Notion to Outlook Calendar Event generator.
 Please create an [issue](https://github.com/DylanDevelops/notion-to-outlook/issues/new) with as much information as possible. Creating a detailed issue report helps contributors fix the issue.
 
 # Contributions
-This project is open source so that others can update it if they would like to. If there is a feature you implement, please follow the steps below:
+This project is open source so that others can update it if they want. If there is a feature you implement, please follow the steps below:
 
 **Development:**
 1. Clone the project to your local machine.
 2. Create a new branch **targeting the `main` branch**.
-3. Run the command `npm install` in the console and let the dependencies install.
-4. Make your changes to the code.
-5. Run your program using the command `npm start`.
+3. Run `node -v` and check if your version is `20.5.0` or higher. If not, install node version `20.5.0`.
+4. Run the command `npm install` in the console and let the dependencies install.
+5. Make your changes to the code.
+6. Run your program using the `npm start` command and ensure everything works.
 
 **Publishing:**
 1. If everything works, create a new pull request
