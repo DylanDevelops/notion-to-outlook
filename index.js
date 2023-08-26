@@ -1,10 +1,10 @@
-/*----------------------------------------------*
-*                                               *
-*             ~ Notion to Outlook ~             *
-*                By: Dylan Ravel                *
-*                  LICENSE: MIT                 *
-*                                               *
-*-----------------------------------------------*/
+/*-----------------------------------------------*
+ *                                               *
+ *             ~ Notion to Outlook ~             *
+ *                By: Dylan Ravel                *
+ *                  LICENSE: MIT                 *
+ *                                               *
+ *-----------------------------------------------*/
 
 const { Client: MSGraphClient } = require('@microsoft/microsoft-graph-client');
 const { Client: NotionClient } = require('@notionhq/client');
