@@ -7,12 +7,24 @@
  *-----------------------------------------------*/
 
 const { Client: NotionClient } = require('@notionhq/client');
+const express = require('express');
+const axios = require('axios');
+const qs = require('querystring');
+
+const app = express();
+const PORT = 3000;
+
 require('dotenv').config();
 
+const GRAPH_API_URL = 'https://graph.microsoft.com/v1.0/me/events';
+const REDIRECT_URI = 'http://localhost:3000/callback';
+
+// * Initiate Notion Client
 const notion = new NotionClient({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
 });
 
+// * Fetches notion data
 async function fetchNotionData() {
     try {
         const response = await notion.databases.query({
@@ -26,8 +38,37 @@ async function fetchNotionData() {
     }
 }
 
-async function main() {
+app.get('/authorize', (req, res) => {
+    const authEndpoint = 'https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize';
+    const params = {
+        client_ID: process.env.APPLICATION_CLIENT_ID,
+        response_type: 'code',
+        redirect_uri: REDIRECT_URI,
+        scope: 'offline_access Calendars.ReadWrite',
+        response_mode: 'query',
+        state: '12345',
+    };
+
+    const authorizeUrl = `${authEndpoint}?${qs.stringify(params)}`;
+    res.redirect(authorizeUrl);
+});
+
+app.get('/callback', async (req, res) => {
+    const tokenEndpoint = 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token';
+    const code = req.query.code;
+
+    const tokenParams = {
+        client_id: process.env.APPLICATION_CLIENT_ID,
+        client_secret: process.env.APPLICATION_SECRET_CLIENT_VALUE,
+        code: code,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+    };
+
     try {
+        const response = await axios.post(tokenEndpoint, qs.stringify(tokenParams));
+        const accessToken = response.data.access_token;
+
         const data = await fetchNotionData();
 
         console.log("Retrieved Data:");
@@ -102,7 +143,7 @@ async function main() {
             } else if (numCourses > 2) {
                 formattedCourseNames = assignmentCourseNames.slice(0, -1).join(', ') + ', & ' + assignmentCourseNames.slice(-1)[0];
             }
-            
+
             console.log(
                 "\n",
                 "Assignment Name: " + assignmentName + "\n",
@@ -113,7 +154,7 @@ async function main() {
                 "\n"
             );
 
-            const eventDetails = {
+            const eventPayload = {
                 subject: `(${formattedCourseNames}) ${assignmentName}`,
                 start: {
                     dateTime: assignmentDeadline,
@@ -124,10 +165,22 @@ async function main() {
                     timeZone: 'UTC',
                 },
             };
+
+            const headers = {
+                Authorization: `Bearer ${accessToken}`,
+            };
+
+            const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
+            console.log('Event created:', createEventResponse.data);
+
+            res.send('Event created successfully!');
         }
     } catch (error) {
         console.error('Error:', error.message);
+        res.send('Error creating event.');
     }
-}
+});
 
-main();
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+});
