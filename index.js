@@ -183,4 +183,5 @@ app.get('/callback', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
+    console.log(`Visit http://localhost:${PORT}/authorize to start the OAuth flow.`)
 });
