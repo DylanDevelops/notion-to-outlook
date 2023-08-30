@@ -6,6 +6,9 @@
  *                                               *
  *-----------------------------------------------*/
 
+// This is a setting added just for testing
+const justTestingNotion = true;
+
 const { Client: NotionClient } = require('@notionhq/client');
 const express = require('express');
 const axios = require('axios');
@@ -76,6 +79,7 @@ app.get('/callback', async (req, res) => {
         for(const item of data) {
             let assignmentName;
             let assignmentDeadline;
+            let assignmentNotes;
             let assignmentType;
             let assignmentProgress;
             let assignmentCourseNames = []; // Use an array to store multiple course names
@@ -92,6 +96,14 @@ app.get('/callback', async (req, res) => {
                 assignmentDeadline = item.properties.deadline.date.start;
             } else {
                 console.error("Item has no 'deadline' property.");
+            }
+
+            // Access and log the "notes" property
+            //
+            if (item.properties.notes) {
+                assignmentNotes = item.properties.progress.notes;
+            } else {
+                console.error("Item has no 'progress' property.");
             }
 
             // Access and log the "type" property
@@ -150,12 +162,17 @@ app.get('/callback', async (req, res) => {
                 "Course Names: " + formattedCourseNames + "\n",
                 "Assignment Deadline: " + assignmentDeadline + "\n",
                 "Assignment Type: " + assignmentType + "\n",
-                "Assignment Progress: " + assignmentProgress,
+                "Assignment Progress: " + assignmentProgress + "\n",
+                "Assignment Notes: " + assignmentNotes,
                 "\n"
             );
 
             const eventPayload = {
                 subject: `(${formattedCourseNames}) ${assignmentName}`,
+                body: {
+                    contentType: 'HTML',
+                    content: assignmentNotes,
+                },
                 start: {
                     dateTime: assignmentDeadline,
                     timeZone: 'UTC',
@@ -170,10 +187,11 @@ app.get('/callback', async (req, res) => {
                 Authorization: `Bearer ${accessToken}`,
             };
 
-            const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
-            console.log('Event created:', createEventResponse.data);
-
-            res.send('Event created successfully!');
+            if(!justTestingNotion) {
+                const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
+                console.log('Event created:', createEventResponse.data);
+                res.send('Event created successfully!');
+            }
         }
     } catch (error) {
         console.error('Error:', error.message);
