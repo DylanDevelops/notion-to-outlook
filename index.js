@@ -196,27 +196,13 @@ app.get('/callback', async (req, res) => {
             };
 
             if(!justGrabNotionData) {
-                // Construct a unique subject for the event using assignment name and deadline
-                const eventSubject = `(${formattedCourseNames}) ${assignmentName}`;
-                
-                // Query Outlook calendar to check if an event with the same subject and start time already exists
-                const existingEventsResponse = await axios.get(GRAPH_API_URL, { headers });
-                const existingEvents = existingEventsResponse.data.value;
+                // creates the event
+                const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
+                console.log('Event created:', createEventResponse.data);
+                createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
 
-                const isEventAlreadyExists = existingEvents.some(event => {
-                    return event.subject === eventSubject && event.start.dateTime === assignmentDeadline;
-                });
-
-                if (!isEventAlreadyExists) {
-                    const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
-                    console.log('Event created:', createEventResponse.data);
-                    createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
-
-                    // rate limit so that it doesn't exceed the API limit by accident
-                    await new Promise(resolve => setTimeout(resolve, rateLimit));
-                } else {
-                    console.log("Event already exists. Moving on...");
-                }
+                // rate limit so that it doesn't exceed the API limit by accident
+                await new Promise(resolve => setTimeout(resolve, rateLimit));
             }
         }
 
