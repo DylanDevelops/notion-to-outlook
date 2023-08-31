@@ -20,7 +20,7 @@ jobs:
       run: npm install
 
     - name: Update Outlook Calendar with Notion Deadlines
-      run: npm start
+      run: npm start -- --create-events
       env:
         NOTION_INTEGRATION_TOKEN: ${{ secrets.NOTION_INTEGRATION_TOKEN }}
         NOTION_UNI_DEADLINES_DATABASE_ID: ${{ secrets.NOTION_UNI_DEADLINES_DATABASE_ID }}

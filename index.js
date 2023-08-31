@@ -6,8 +6,8 @@
  *                                               *
  *-----------------------------------------------*/
 
-// This is a setting added just for testing
-const justGrabNotionData = true; // turn this off for release
+// This tick will always be disabled in production due to workflow
+const justGrabNotionData = !process.argv.includes('--create-events');
 
 const { Client: NotionClient } = require('@notionhq/client');
 const express = require('express');
@@ -55,6 +55,9 @@ app.get('/authorize', (req, res) => {
     const authorizeUrl = `${authEndpoint}?${qs.stringify(params)}`;
     res.redirect(authorizeUrl);
 });
+
+// Initialize the createdEvents array
+const createdEvents = [];
 
 app.get('/callback', async (req, res) => {
     const tokenEndpoint = 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token';
@@ -192,13 +195,28 @@ app.get('/callback', async (req, res) => {
                 Authorization: `Bearer ${accessToken}`,
             };
 
-            if (!justGrabNotionData) {
-                const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
-                console.log('Event created:', createEventResponse.data);
-                createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
+            if(!justGrabNotionData) {
+                // Construct a unique subject for the event using assignment name and deadline
+                const eventSubject = `(${formattedCourseNames}) ${assignmentName}`;
                 
-                // rate limit so that it doesn't exceed the API limit by accident
-                await new Promise(resolve => setTimeout(resolve, rateLimit));
+                // Query Outlook calendar to check if an event with the same subject and start time already exists
+                const existingEventsResponse = await axios.get(GRAPH_API_URL, { headers });
+                const existingEvents = existingEventsResponse.data.value;
+
+                const isEventAlreadyExists = existingEvents.some(event => {
+                    return event.subject === eventSubject && event.start.dateTime === assignmentDeadline;
+                });
+
+                if (!isEventAlreadyExists) {
+                    const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
+                    console.log('Event created:', createEventResponse.data);
+                    createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
+
+                    // rate limit so that it doesn't exceed the API limit by accident
+                    await new Promise(resolve => setTimeout(resolve, rateLimit));
+                } else {
+                    console.log("Event already exists. Moving on...");
+                }
             }
         }
 
