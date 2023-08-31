@@ -20,6 +20,11 @@ Please create an [issue](https://github.com/DylanDevelops/notion-to-outlook/issu
 # Contributions
 This project is open source so that others can update it if they want. If there is a feature you implement, please follow the steps below:
 
+**Helpful Links:**
+1. [Microsoft Graph API Documentation](https://learn.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0)
+2. [Outlook Calendar API Documentation](https://learn.microsoft.com/en-us/graph/api/resources/calendar?view=graph-rest-1.0)
+3. [Microsoft Graph API Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer)
+
 **Development:**
 1. Clone the project to your local machine.
 2. Create a new branch **targeting the `main` branch**.
