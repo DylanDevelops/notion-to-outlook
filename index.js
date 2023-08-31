@@ -7,7 +7,7 @@
  *-----------------------------------------------*/
 
 // This is a setting added just for testing
-const justTestingNotion = true;
+const justGrabNotionData = true; // turn this off for release
 
 const { Client: NotionClient } = require('@notionhq/client');
 const express = require('express');
@@ -16,10 +16,10 @@ const qs = require('querystring');
 
 const app = express();
 const PORT = 3000;
-
+const rateLimit = 1000; // * in milliseconds
 require('dotenv').config();
 
-const GRAPH_API_URL = 'https://graph.microsoft.com/v1.0/me/events';
+const GRAPH_API_URL = `https://graph.microsoft.com/v1.0/me/calendars/${process.env.APPLICATION_TARGET_CALENDAR_ID}/events`;
 const REDIRECT_URI = 'http://localhost:3000/callback';
 
 // * Initiate Notion Client
@@ -76,6 +76,8 @@ app.get('/callback', async (req, res) => {
 
         console.log("Retrieved Data:");
 
+        let currentIndex = 0;
+
         for(const item of data) {
             let assignmentName;
             let assignmentDeadline;
@@ -99,11 +101,10 @@ app.get('/callback', async (req, res) => {
             }
 
             // Access and log the "notes" property
-            //
-            if (item.properties.notes) {
-                assignmentNotes = item.properties.progress.notes;
+            if (item.properties.notes && item.properties.notes.rich_text) {
+                assignmentNotes = item.properties.notes.rich_text.map(textObj => textObj.plain_text).join('\n');
             } else {
-                console.error("Item has no 'progress' property.");
+                assignmentNotes = '';
             }
 
             // Access and log the "type" property
@@ -167,6 +168,10 @@ app.get('/callback', async (req, res) => {
                 "\n"
             );
 
+            // shows which element index is currently being processed
+            console.log(`Retrieved Data: ${currentIndex + 1}/${data.length}`);
+            currentIndex++;
+
             const eventPayload = {
                 subject: `(${formattedCourseNames}) ${assignmentName}`,
                 body: {
@@ -187,11 +192,20 @@ app.get('/callback', async (req, res) => {
                 Authorization: `Bearer ${accessToken}`,
             };
 
-            if(!justTestingNotion) {
+            if (!justGrabNotionData) {
                 const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
                 console.log('Event created:', createEventResponse.data);
-                res.send('Event created successfully!');
+                createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
+                
+                // rate limit so that it doesn't exceed the API limit by accident
+                await new Promise(resolve => setTimeout(resolve, rateLimit));
             }
+        }
+
+        if (!justGrabNotionData) {
+            res.send(createdEvents.join('\n'));
+        } else {
+            res.send('All notion data retrieved.');
         }
     } catch (error) {
         console.error('Error:', error.message);
