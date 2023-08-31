@@ -171,12 +171,15 @@ app.get('/callback', async (req, res) => {
                 "\n"
             );
 
+            // creates a unique identifier which also happens to be the subject
+            let uniqueIdentifier = `(${formattedCourseNames}) ${assignmentName}`;
+
             // shows which element index is currently being processed
             console.log(`Retrieved Data: ${currentIndex + 1}/${data.length}`);
             currentIndex++;
 
             const eventPayload = {
-                subject: `(${formattedCourseNames}) ${assignmentName}`,
+                subject: uniqueIdentifier,
                 body: {
                     contentType: 'HTML',
                     content: assignmentNotes,
@@ -196,13 +199,21 @@ app.get('/callback', async (req, res) => {
             };
 
             if(!justGrabNotionData) {
-                // creates the event
-                const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
-                console.log('Event created:', createEventResponse.data);
-                createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
+                const getEventsResponse = await axios.get(GRAPH_API_URL, { headers });
 
-                // rate limit so that it doesn't exceed the API limit by accident
-                await new Promise(resolve => setTimeout(resolve, rateLimit));
+                const existingEvent = getEventsResponse.data.value.find(event => event.subject === uniqueIdentifier);
+
+                if(existingEvent) {
+                    console.log("Event with matching subject already exists. Skipping...");
+                } else {
+                    // creates the event
+                    const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
+                    console.log('Event created:', createEventResponse.data);
+                    createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
+
+                    // rate limit so that it doesn't exceed the API limit by accident
+                    await new Promise(resolve => setTimeout(resolve, rateLimit));
+                }
             }
         }
 
