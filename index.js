@@ -60,6 +60,8 @@ app.get('/authorize', (req, res) => {
 const createdEvents = [];
 
 app.get('/callback', async (req, res) => {
+    let existingEvents = []; // clears the existing events array
+
     const tokenEndpoint = 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token';
     const code = req.query.code;
 
@@ -80,6 +82,17 @@ app.get('/callback', async (req, res) => {
         console.log("Retrieved Data:");
 
         let currentIndex = 0;
+
+        // get existing events once before the loop
+        existingEvents = [];
+        if(!justGrabNotionData) {
+            const headers = {
+                Authorization: `Bearer ${accessToken}`,
+            };
+            const getEventsResponse = await axios.get(GRAPH_API_URL, { headers });
+            existingEvents = getEventsResponse.data.value;
+            console.log(existingEvents);
+        }
 
         for(const item of data) {
             let assignmentName;
@@ -173,6 +186,15 @@ app.get('/callback', async (req, res) => {
 
             // creates a unique identifier which also happens to be the subject
             let uniqueIdentifier = `(${formattedCourseNames}) ${assignmentName}`;
+            
+            // iterates through the array of existing events to check if the event already exists
+            let existingEvent = false;
+            for(const item of existingEvents) {
+                if(item.subject === uniqueIdentifier) {
+                    existingEvent = true;
+                    break; // breaks out of the loop if the event already exists
+                }
+            }
 
             // shows which element index is currently being processed
             console.log(`Retrieved Data: ${currentIndex + 1}/${data.length}`);
@@ -199,18 +221,14 @@ app.get('/callback', async (req, res) => {
             };
 
             if(!justGrabNotionData) {
-                const getEventsResponse = await axios.get(GRAPH_API_URL, { headers });
-
-                const existingEvent = getEventsResponse.data.value.find(event => event.subject === uniqueIdentifier);
-
                 if(existingEvent) {
                     console.log("Event with matching subject already exists. Skipping...");
                 } else {
                     // creates the event
                     const createEventResponse = await axios.post(GRAPH_API_URL, eventPayload, { headers });
-                    console.log('Event created:', createEventResponse.data);
+                    console.log('Event created!');
                     createdEvents.push(`Event created: ${createEventResponse.data.subject}`);
-
+    
                     // rate limit so that it doesn't exceed the API limit by accident
                     await new Promise(resolve => setTimeout(resolve, rateLimit));
                 }
@@ -218,6 +236,7 @@ app.get('/callback', async (req, res) => {
         }
 
         if (!justGrabNotionData) {
+            console.log('All events created!');
             res.send(createdEvents.join('\n'));
         } else {
             res.send('All notion data retrieved.');
