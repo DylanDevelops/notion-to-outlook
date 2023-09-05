@@ -13,6 +13,8 @@ const { Client: NotionClient } = require('@notionhq/client');
 const express = require('express');
 const axios = require('axios');
 const qs = require('querystring');
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');
 
 const app = express();
 const PORT = 3000;
@@ -26,6 +28,13 @@ const REDIRECT_URI = 'http://localhost:3000/callback';
 const notion = new NotionClient({
     auth: process.env.NOTION_INTEGRATION_TOKEN,
 });
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://notion-to-outlook-19374.firebaseio.com"
+});
+
+const db = admin.firestore();
 
 // * Fetches notion data
 async function fetchNotionData() {
