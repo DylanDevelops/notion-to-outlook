@@ -12,6 +12,10 @@
 </p>
 
 # What is this?
+
+> [!NOTE]
+> This project is no longer in active development.
+
 This is the official codebase for my Notion to Outlook Calendar Event generator. It pulls data from a notion calendar and creates an Outlook event for each assignment. The program then runs every hour to update the Outlook calendar accordingly.
 
 # Issues or Bugs
